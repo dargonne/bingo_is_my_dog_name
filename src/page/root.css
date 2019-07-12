@@ -1,0 +1,25 @@
+.root-wrapper {
+  display: flex; 
+  flex-direction: column; 
+  -ms-flex-direction: column; 
+}
+
+.root-wrapper .board {
+  display: flex; 
+  flex-direction: row; 
+  -ms-flex-direction: row; 
+  justify-content: center; 
+  align-items: center; 
+}
+
+.root-wrapper .title {
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+}
+
+.root-wrapper .button {
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+}
