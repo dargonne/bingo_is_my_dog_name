@@ -1,0 +1,31 @@
+.board-cell {
+  display: flex; 
+  position: relative; 
+  width: 50px; 
+  height: 50px; 
+  border: 1px solid #000000; 
+  justify-content: center; 
+  align-items: center; 
+}
+
+.checked {
+  display: flex; 
+  width: 45px; 
+  height: 45px; 
+  border: 2px solid green;
+  border-radius: 50%;  
+  justify-content: center; 
+  align-items: center; 
+}
+
+.finished {
+  display: flex; 
+  width: 45px; 
+  height: 45px; 
+  color: red; 
+  position: absolute; 
+  top: -10px; 
+  left: 20px;
+  font-size: 1.4em;
+  font-weight: 600; 
+}
