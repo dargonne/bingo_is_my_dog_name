@@ -13,7 +13,7 @@ class Cell extends Component {
 
   /** 숫자 셀 클릭시 이벤트 예외처리 */
   handleCheckEvt() {
-    const { player, nowPlayer, value, checked, changeSelectedNumber, changePlayerTurn } = this.props; 
+    const { player, nowPlayer, value, checked, changeSelectedNumber, changePlayerTurn, rowIdx, colIdx } = this.props; 
     
     /** 게임 시작 전(초기화) 상태일 때  */
     if(!value) {
@@ -31,26 +31,31 @@ class Cell extends Component {
     }
 
     /** 예외처리에 해당하지 않았다면 선택한 번호와 다음 턴을 이용할 플레이어 정보를 Store에 저장 */
-    const passTurnPlayer = player !== 1 ? 1 : 2;  
+    const passTurnPlayer = {
+      number: value, 
+      row: rowIdx, 
+      col: colIdx, 
+      player: player !== 1 ? 1 : 2
+    }
     changeSelectedNumber(value[0]); 
     changePlayerTurn(passTurnPlayer); 
   }
 
   /** 렌더링 */
   render() {
-    const { value, checked, finished } = this.props; 
+    // const { value, checked, finished } = this.props; 
 
     // 해당 셀에 빙고 완성 순번 저장 
-    let finishList; 
+    // let finishList; 
 
-    if(finished) {
-      finishList = finished.map((item) => <div className="finished">{ finished} </div>)
-    }
+    // if(finished) {
+    //   finishList = finished.map((item) => <div className="finished">{ finished} </div>)
+    // }
 
     return (
       <div className="board-cell" onClick={this.handleCheckEvt}>
-        { checked ? <div className="checked">{ value }</div> : <div>{ value }</div> }
-        { finished ? finishList : "" }
+        { this.props.value } 
+        {/* { checked ? <div className="checked">{ value }</div> : <div>{ value }</div> } */}
       </div> 
     )
   }
