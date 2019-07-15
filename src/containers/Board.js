@@ -1,6 +1,7 @@
 import React, { Component }  from 'react'; 
 import { connect } from 'react-redux'; 
-import { changeRestartStatus, changeGameStatus, changeSelectedNumber, changePlayerTurn, changePlayerPoint } from '../store/bingo'; 
+import { actionRestartFlag } from '../store/bingo'; 
+import { INIT_BINGO_MATRIX, SUFFLE_BINGO_MATRIX, CHECK_IS_BINGO } from '../modules'; 
 
 import Cell from './BoardCell'; 
 
@@ -21,8 +22,7 @@ class Board extends Component {
     super(props); 
     
     this.state = {
-      player: props.player, 
-      matrix: null, 
+      matrix: null 
     }; 
     
   }
@@ -32,223 +32,58 @@ class Board extends Component {
     const { matrix } = this.state; 
   
     if(!matrix) {
-      this.initMatrix(); 
+      this.init(); 
     } 
   }
-  
-  /** 게임 시작, 숫자 Cell 선택시 */
-  componentDidUpdate(prevProps, prevState) {
-    const nextProps = this.props;  
 
-    if(nextProps.isRunning && nextProps.isRestart) {
+  componentDidUpdate(prevProps, prevStatus) {
+    const nextProps = this.props;
+
+    if(!prevProps.isRunning && nextProps.isRunning) {
       this.suffle(); 
     }
-
-    if(nextProps.selectedNumber) {
-      this.evtNumberSelected(nextProps.selectedNumber); 
-    }
- 
   }
 
-  /** Board 내 Cell 클릭 이벤트 발생 시 숫자 체크 표시 렌더링 처리 */
-  async evtNumberSelected(value) {
-    const { matrix } = this.state; 
-    const { changeSelectedNumber } = this.props; 
- 
-    const findOutMatrix =  await matrix.map((row) => 
-                              row.map((col) => {
-                                if(col.value[0] === value) {
-                                  col.checked = true; 
-                                }
-                                return col; 
-                              })
-                           ); 
-    
-    await changeSelectedNumber(null);  
-    
-    await this.setState({
-      player: this.props.player, 
-      matrix: findOutMatrix, 
-    }); 
-
-    await this.checkIsBingo(); 
-  }
-
-  /** 해당 플레이어의 빙고 개수 여부 확인 */
-  checkIsBingo() {
-
-    const { matrix } = this.state; 
-    const { player } = this.props; 
-
-    let bingoCount = 0; 
-    
-    // 가로 빙고 개수 획득 
-    for(let row=0; row < matrix.length; row++ ) {
-      
-      let isBingo = true; 
-
-      for(let col=0; col < matrix[row].length; col++) {
-        const item = matrix[row][col]; 
-        
-        if(!item.checked) {
-          isBingo = false; 
-        }
-      }
-
-      if(isBingo) {
-        
-        bingoCount++; 
-        const setPosition = {
-          row, 
-          col: 0
-        }
-        this.labelingBingo(setPosition, bingoCount, player); 
-      }
-    }
-
-    // 세로 빙고 개수 획득 
-    for(let col=0; col < matrix.length; col++) {
-      let isBingo = true; 
-
-      for(let row=0; row < matrix[col].length; row++) {
-        const item = matrix[row][col]; 
-
-        if(!item.checked) {
-          isBingo = false; 
-        }
-      }
-
-      if(isBingo) {
-        bingoCount++; 
-        const setPosition = {
-          col, 
-          row: 0
-        }
-        this.labelingBingo(setPosition, bingoCount, player); 
-      }
-    }
-    
-    // 대각선 빙고 여부
-    let bingoLtoR = true; 
-    let bingoRtoL = true; 
-    const SIZE = matrix.length; 
-
-    for(let cnt=0; cnt < SIZE; cnt++) {
-      const item = matrix[cnt][cnt]; 
-
-      if(!item.checked) {
-        bingoLtoR = false; 
-      }
-    }
-
-    if(bingoLtoR) {
-      bingoCount++;
-      const setPosition = {
-        row: 1, 
-        col: 1, 
-      }
-      this.labelingBingo(setPosition, bingoCount, player);  
-    }
-
-    for(let cnt=0; cnt < SIZE; cnt++) {
-      const item = matrix[cnt][(SIZE-1)-cnt]; 
-
-      if(!item.checked) {
-        bingoRtoL = false; 
-      }
-    }
-
-    if(bingoRtoL) {
-      bingoCount++;
-      const setPosition = {
-        row: 3, 
-        col: 3,
-      }
-
-      this.labelingBingo(setPosition, bingoCount, player); 
-    } 
-    
-    const playerPointInfo = {
-      player: this.props.player, 
-      count: bingoCount
-    }; 
-
-    const { changePlayerPoint } = this.props; 
-
-    changePlayerPoint(playerPointInfo); 
-  }
-
-  /** 
-   * 한줄 빙고시 빙고 생성 순서 라벨을 출력 처리하는 함수 
-   * issue 발생으로 처리방법 고안중 
-   */
-  labelingBingo(position, count, player) {
-    
-  }
-
-  /** 최초 보드 2차원 배열 생성(초기화) */
-  initMatrix() {
-    let arrInitMatrix = []; 
-
-    for(let row=0; row<5; row++) {
-      let arrInitRow = []; 
-
-      for(let col=0; col<5; col++) {
-        const tmpItem = {
-          value: "", 
-          checked: false, 
-          finished: [], 
-        }; 
-
-        arrInitRow.push(tmpItem); 
-      }
-
-      arrInitMatrix.push(arrInitRow); 
-    }
-
+  async init() {
     this.setState({
-      matrix: arrInitMatrix, 
+      matrix: await INIT_BINGO_MATRIX()
     }); 
-
   }
 
-  /** 게임 시작 또는 재시작 시 임의의 숫자로 생성하여 보드에 표기 */
-  suffle() {
-    const SIZE = 25; 
-    let arrNumbers = []; 
-    let arrMatrix = []; 
-    
-    for(let number=1; number<=SIZE; number++) {
-      arrNumbers.push(number); 
-    }
+  async suffle() {
+    const { matrix } = this.state; 
+    const { isRestart, actionRestartFlag } = this.props; 
 
-    for(let row=0; row<5; row++) {
-      let arrColumn = []; 
-      
-      for(let col=0; col<5; col++) {
-        const objCell = {
-          value: arrNumbers.splice(Math.floor(Math.random() * arrNumbers.length) ,1), 
-          checked: false, 
-          finished: [],
-        }; 
+    if(matrix) {
+      this.setState({
+        matrix: await SUFFLE_BINGO_MATRIX(matrix)  
+      });
 
-        arrColumn.push(objCell); 
+      if(isRestart) {
+        await actionRestartFlag(); 
       }
-
-      arrMatrix.push(arrColumn); 
     }
-
-    this.setState({
-      matrix: arrMatrix, 
-    }); 
-
-    this.props.changeRestartStatus(false); 
   }
 
   /** 렌더링 */
   render() {
-    const { player, isRunning, nowPlayer } = this.props; 
+    const { player } = this.props; 
     const { matrix } = this.state; 
+
+    let renderComp = null; 
+
+    if(matrix) {
+
+      renderComp = matrix.map((row, rowIdx) => (
+                      row.map((col, colIdx) => (
+                        <Cell 
+                          key={(colIdx + rowIdx) + 1}
+                          value={col.value} 
+                          /> 
+                      ))
+                    )); 
+    }
+
 
     return (
       <div className="board-container">
@@ -257,21 +92,7 @@ class Board extends Component {
         </div>
         <div className="board">
           {
-            matrix ? matrix.map((row, rowIdx) => 
-              row.map((col, colIdx) => (
-                <Cell 
-                  key={(rowIdx + colIdx) + 1}
-                  player={Number(player)}
-                  nowPlayer={nowPlayer}
-                  rowIdx={rowIdx}
-                  colIdx={colIdx} 
-                  value={col.value}
-                  checked={col.checked}
-                  finished={col.finished}
-                  isRunning={isRunning}
-                />  
-              ))
-            ) : ""
+            renderComp ? renderComp : "" 
           }
         </div>
       </div> 
@@ -284,11 +105,12 @@ const boardStateToProps = ({ bingo }) => {
 }; 
 
 const boardDispatchToProps = dispatch => ({
-  changeGameStatus: status => dispatch(changeGameStatus(status)), 
-  changeRestartStatus: status => dispatch(changeRestartStatus(status)), 
-  changeSelectedNumber: number => dispatch(changeSelectedNumber(number)), 
-  changePlayerTurn: player => dispatch(changePlayerTurn(player)), 
-  changePlayerPoint: info => dispatch(changePlayerPoint(info)), 
+  actionRestartFlag: () => dispatch(actionRestartFlag()), 
+  // changeGameStatus: status => dispatch(changeGameStatus(status)), 
+  // changeRestartStatus: status => dispatch(changeRestartStatus(status)), 
+  // changeSelectedNumber: number => dispatch(changeSelectedNumber(number)), 
+  // changePlayerTurn: player => dispatch(changePlayerTurn(player)), 
+  // changePlayerPoint: info => dispatch(changePlayerPoint(info)), 
 }); 
 
 
