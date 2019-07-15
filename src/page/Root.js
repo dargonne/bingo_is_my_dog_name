@@ -9,24 +9,32 @@ import { actionStartFlag, actionRestartFlag } from '../store/bingo';
 
 /** 페이지 최상위 (Root) 컴포넌트 */
 class Root extends Component {
+
   constructor(props) {
     super(props); 
+
+    this.handleOnStart = this.handleOnStart.bind(this); 
+    this.handleOnRestart = this.handleOnRestart.bind(this); 
+  }
+
+  handleOnStart = (e) => {
+    e.preventDefault();
+    console.log('start'); 
+    const { onStart } = this.props; 
+    onStart(); 
+  }
+
+  handleOnRestart = (e) => {
+    e.preventDefault();
+    console.log('restart'); 
+    const { onRestart }  = this.props; 
+    onRestart(true); 
   }
 
   
   /** Rendering */
   render() {
-    const { isRunning, isRestart, onStart, onReset } = this.props; 
-    
-    let renderButton = null; 
-
-    if(!renderButton) {
-      if(!isRunning) {
-        renderButton = <button onClick={onStart}>시작하기</button>
-      } else {
-        renderButton = <button onClick={onReset}>재시작하기</button>
-      }
-    }
+    const { isRunning } = this.props; 
 
     return (
       <div className="root-wrapper"> 
@@ -38,7 +46,8 @@ class Root extends Component {
           <Board player="2"/>
         </div>
         <div className="button">
-          { renderButton ? renderButton : "" }
+          { !isRunning ? <button onClick={this.handleOnStart}>시작하기</button> : "" }
+          { isRunning ? <button onClick={this.handleOnRestart}>재시작하기</button> : "" } 
         </div>
       </div>
     )
@@ -49,14 +58,13 @@ class Root extends Component {
 const rootStateToProps = ({bingo}) => {
   return {
     isRunning: bingo.isRunning, 
-    isRestart: bingo.isRestart,   
   }
 }
 
 const rootDispatchToProps = (dispatch) => {
   return {
     onStart: () => { dispatch(actionStartFlag())}, 
-    onReset: () => { dispatch(actionRestartFlag())}, 
+    onRestart: (flag) => { dispatch(actionRestartFlag(flag))}, 
   }
 }
 

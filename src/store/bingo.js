@@ -12,7 +12,7 @@ const CHANGE_RESTART_STATUS  = 'CHANGE_RESTART_STATUS';
 
 /** BINGO Action Creators */
 export const actionStartFlag = () => { return { type: ACTION_START_FLAG }}; 
-export const actionRestartFlag = () => { return { type: ACTION_RESTART_FLAG }}; 
+export const actionRestartFlag = (flag) => { return { type: ACTION_RESTART_FLAG, flag }}; 
 
 export function changeGameStatus(status) {
   return {
@@ -74,12 +74,12 @@ export default function bingo(state = initState, action) {
     case ACTION_START_FLAG: 
       return {
         ...state, 
-        isRunning: !action.flag, 
+        isRunning: !state.isRunning, 
       }
     case ACTION_RESTART_FLAG: 
       return {
         ...state, 
-        isRestart: !action.flag, 
+        isRestart: action.flag,  
       }
     default: 
       return state; 

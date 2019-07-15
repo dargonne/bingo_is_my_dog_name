@@ -18,6 +18,8 @@ class Board extends Component {
    * 컴포넌트 간 공유에 필요한 사항을 store에 저장하고 나머지는 컴포넌트 내에서 
    * 데이터 활용하기로 결정하고 코드를 작성하게 되었습니다. 
    */
+  flagRestart = false; 
+  
   constructor(props) {
     super(props); 
     
@@ -42,6 +44,10 @@ class Board extends Component {
     if(!prevProps.isRunning && nextProps.isRunning) {
       this.suffle(); 
     }
+
+    if(nextProps.isRunning && nextProps.isRestart) {
+      this.suffle();
+    } 
   }
 
   async init() {
@@ -52,7 +58,7 @@ class Board extends Component {
 
   async suffle() {
     const { matrix } = this.state; 
-    const { isRestart, actionRestartFlag } = this.props; 
+    const { isRestart, onRestart } = this.props; 
 
     if(matrix) {
       this.setState({
@@ -60,7 +66,7 @@ class Board extends Component {
       });
 
       if(isRestart) {
-        await actionRestartFlag(); 
+        onRestart(false); 
       }
     }
   }
@@ -104,14 +110,11 @@ const boardStateToProps = ({ bingo }) => {
   return bingo; 
 }; 
 
-const boardDispatchToProps = dispatch => ({
-  actionRestartFlag: () => dispatch(actionRestartFlag()), 
-  // changeGameStatus: status => dispatch(changeGameStatus(status)), 
-  // changeRestartStatus: status => dispatch(changeRestartStatus(status)), 
-  // changeSelectedNumber: number => dispatch(changeSelectedNumber(number)), 
-  // changePlayerTurn: player => dispatch(changePlayerTurn(player)), 
-  // changePlayerPoint: info => dispatch(changePlayerPoint(info)), 
-}); 
+const boardDispatchToProps = (dispatch) => {
+  return {
+    onRestart: (flag) => { dispatch(actionRestartFlag(flag))}, 
+  }
+}; 
 
 
 export default connect(boardStateToProps, boardDispatchToProps)(Board); 
