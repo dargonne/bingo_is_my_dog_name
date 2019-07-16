@@ -45,19 +45,12 @@ class Cell extends Component {
 
   /** 렌더링 */
   render() {
-    const { checked, value } = this.props; 
-    // const { value, checked, finished } = this.props; 
-
-    // 해당 셀에 빙고 완성 순번 저장 
-    // let finishList; 
-
-    // if(finished) {
-    //   finishList = finished.map((item) => <div className="finished">{ finished} </div>)
-    // }
+    const { checked, value, finished } = this.props;
 
     return (
       <div className="board-cell" onClick={this.handleCheckEvt}>
         { checked ? <div className="checked">{ value }</div> : <div>{ value }</div> }
+        { finished ? <div className="finished">{ finished }</div> : ""}
       </div> 
     )
   }

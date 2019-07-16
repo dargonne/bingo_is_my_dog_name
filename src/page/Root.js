@@ -5,7 +5,7 @@ import { Title } from '../components/Title';
 import Board from '../containers/Board'; 
 
 import './root.css'; 
-import { actionStartFlag, actionRestartFlag } from '../store/bingo'; 
+import { actionStartFlag, actionRestartFlag, actionResetBoard } from '../store/bingo'; 
 
 /** 페이지 최상위 (Root) 컴포넌트 */
 class Root extends Component {
@@ -25,8 +25,9 @@ class Root extends Component {
 
   handleOnRestart = (e) => {
     e.preventDefault();
-    const { onRestart }  = this.props; 
+    const { onRestart, onReset }  = this.props; 
     onRestart(true); 
+    onReset(true); 
   }
 
   
@@ -54,15 +55,14 @@ class Root extends Component {
 
 
 const rootStateToProps = ({bingo}) => {
-  return {
-    isRunning: bingo.isRunning, 
-  }
+  return bingo; 
 }
 
 const rootDispatchToProps = (dispatch) => {
   return {
     onStart: () => { dispatch(actionStartFlag())}, 
     onRestart: (flag) => { dispatch(actionRestartFlag(flag))}, 
+    onReset: (flag) => dispatch(actionResetBoard(flag)), 
   }
 }
 

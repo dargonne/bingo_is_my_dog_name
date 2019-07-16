@@ -44,7 +44,6 @@ export const SUFFLE_BINGO_MATRIX = async (matrix) => {
 export const CHECK_NUMBER_ON_BOARD = async (matrix, selected) => {
   return await matrix.map((row) => {
     row.map((col) => {
-
       if(col.value === selected) {
         col.checked = true; 
         return col; 
@@ -54,6 +53,22 @@ export const CHECK_NUMBER_ON_BOARD = async (matrix, selected) => {
 
     return row; 
   });  
+}
+
+/** 빙고 완성시 카운팅 표시  */
+export const CHECK_FINISH_BINGO_COUNT = async(matrix, selected, count) => {
+  return await matrix.map((row) => {
+    row.map((col) => {
+
+      if(col.value === selected) {
+        col.finished = count; 
+        return col; 
+      }
+      
+    }); 
+
+    return row; 
+  });   
 }
 
 /** 빙고 개수 카운팅 */

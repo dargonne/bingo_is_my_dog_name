@@ -1,7 +1,7 @@
 import React, { Component }  from 'react'; 
 import { connect } from 'react-redux'; 
-import { actionRestartFlag } from '../store/bingo'; 
-import { INIT_BINGO_MATRIX, SUFFLE_BINGO_MATRIX, CHECK_NUMBER_ON_BOARD, CHECK_IS_BINGO } from '../modules'; 
+import { actionRestartFlag, actionChangePoint, actionResetBoard } from '../store/bingo'; 
+import { INIT_BINGO_MATRIX, SUFFLE_BINGO_MATRIX, CHECK_NUMBER_ON_BOARD, CHECK_IS_BINGO, CHECK_FINISH_BINGO_COUNT } from '../modules'; 
 
 import Cell from './BoardCell'; 
 
@@ -44,7 +44,12 @@ class Board extends Component {
       this.suffle(); 
     }
 
+    if(prevProps.isRunning && !nextProps.isRunning) {
+      this.init(); 
+    }
+
     if(nextProps.isRunning && nextProps.isRestart) {
+      this.init(); 
       this.suffle();
     } 
 
@@ -64,6 +69,7 @@ class Board extends Component {
     const { isRestart, onRestart } = this.props; 
 
     if(matrix) {
+
       this.setState({
         matrix: await SUFFLE_BINGO_MATRIX(matrix)  
       });
@@ -77,13 +83,42 @@ class Board extends Component {
   async checkOnBoard() {
 
     const { matrix } = this.state; 
-    const { numberSelected } = this.props; 
+    const { player, numberSelected, playerPoint, onChangePoint } = this.props; 
 
     this.setState({
       matrix: await CHECK_NUMBER_ON_BOARD(matrix, numberSelected)
     }); 
 
     const bingoCount = await CHECK_IS_BINGO(matrix); 
+
+    if(playerPoint[player] !== bingoCount) {
+      this.setState({
+        matrix: await CHECK_FINISH_BINGO_COUNT(matrix, numberSelected, bingoCount)
+      });
+
+      const changePointPayload = playerPoint; 
+      changePointPayload[player] = bingoCount; 
+
+      await onChangePoint(changePointPayload); 
+
+      if(changePointPayload["1"] >= 5 || changePointPayload["2"] >= 5) {
+        this.alertWhoIsWinner(changePointPayload); 
+      }
+    }
+  }
+
+  alertWhoIsWinner(pointInfo) {
+    if(pointInfo["1"] >= 5 && pointInfo["2"] < 5) {
+      alert("1P가 승리했어요!"); 
+    } else if(pointInfo["1"] < 5 && pointInfo["2"] >= 5) {
+      alert("2P가 승리했어요!"); 
+    } else {
+      alert("무승부 입니다!"); 
+    }
+
+    const { onReset } = this.props; 
+
+    return onReset(false); 
   }
 
   /** 렌더링 */
@@ -132,7 +167,9 @@ const boardStateToProps = ({ bingo }) => {
 
 const boardDispatchToProps = (dispatch) => {
   return {
-    onRestart: (flag) => { dispatch(actionRestartFlag(flag))}, 
+    onRestart: (flag) => { dispatch(actionRestartFlag(flag))},
+    onChangePoint: (point) => { dispatch(actionChangePoint(point))},  
+    onReset: (flag) => { dispatch(actionResetBoard(flag))}, 
   }
 }; 
 
