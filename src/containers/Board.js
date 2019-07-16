@@ -82,8 +82,8 @@ class Board extends Component {
     this.setState({
       matrix: await CHECK_NUMBER_ON_BOARD(matrix, numberSelected)
     }); 
-    
-    
+
+    const bingoCount = await CHECK_IS_BINGO(matrix); 
   }
 
   /** 렌더링 */

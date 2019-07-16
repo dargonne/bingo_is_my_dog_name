@@ -56,7 +56,69 @@ export const CHECK_NUMBER_ON_BOARD = async (matrix, selected) => {
   });  
 }
 
-/** 선택한 번호와 관련된 열이 빙고되어있는지 여부 확인 */
+/** 빙고 개수 카운팅 */
 export const CHECK_IS_BINGO = (matrix) => {
 
+  const horizontalCount = CHECK_HORIZONTAL_BINGO(matrix); 
+  const verticalCount = CHECK_VERTICAL_BINGO(matrix); 
+  const diagnalCount = CHECK_DIAGNAL_BINGO(matrix); 
+
+  return horizontalCount + verticalCount + diagnalCount; 
+}
+
+
+/** 가로 빙고 개수 확인 */
+const CHECK_HORIZONTAL_BINGO = (matrix) => {
+  let horizontalBingoCount = 0; 
+
+  for(let row=0; row<matrix.length; row++) {
+    const rowResult = matrix[row].every(col => col.checked === true); 
+
+    if(rowResult) {
+      ++horizontalBingoCount; 
+    }
+  }
+
+  return horizontalBingoCount; 
+}
+
+/** 세로 빙고 개수 확인 */
+const CHECK_VERTICAL_BINGO = (matrix) => {
+  let verticalBingoCount = 0; 
+
+  for(let col=0; col<matrix.length; col++) {
+
+    let isBingo = true; 
+
+    for(let row=0; row<matrix.length; row++) {
+      if(!matrix[row][col].checked){
+        isBingo = false; 
+      }
+    }
+
+    if(isBingo) {
+      ++verticalBingoCount; 
+    }
+  }
+
+  return verticalBingoCount; 
+}
+
+/** 대각선 빙고 개수 확인 */
+const CHECK_DIAGNAL_BINGO = (matrix) => {
+  const SIZE = 4; 
+  let diagnalLeftToRight = 1; 
+  let diagnalRightToLeft = 1; 
+  
+  for(let idx=0; idx<matrix.length; idx++) {
+    if(!matrix[idx][idx].checked) {
+      diagnalLeftToRight = 0; 
+    }
+
+    if(!matrix[idx][SIZE-idx].checked) {
+      diagnalRightToLeft = 0; 
+    }
+  }
+
+  return diagnalLeftToRight + diagnalRightToLeft; 
 }
