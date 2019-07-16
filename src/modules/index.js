@@ -40,6 +40,22 @@ export const SUFFLE_BINGO_MATRIX = async (matrix) => {
                   });  
 }
 
+/** 선택한 번호에 대한 체크 처리 */
+export const CHECK_NUMBER_ON_BOARD = async (matrix, selected) => {
+  return await matrix.map((row) => {
+    row.map((col) => {
+
+      if(col.value === selected) {
+        col.checked = true; 
+        return col; 
+      }
+      
+    }); 
+
+    return row; 
+  });  
+}
+
 /** 선택한 번호와 관련된 열이 빙고되어있는지 여부 확인 */
 export const CHECK_IS_BINGO = (matrix) => {
 

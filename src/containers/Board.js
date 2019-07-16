@@ -1,7 +1,7 @@
 import React, { Component }  from 'react'; 
 import { connect } from 'react-redux'; 
 import { actionRestartFlag } from '../store/bingo'; 
-import { INIT_BINGO_MATRIX, SUFFLE_BINGO_MATRIX, CHECK_IS_BINGO } from '../modules'; 
+import { INIT_BINGO_MATRIX, SUFFLE_BINGO_MATRIX, CHECK_NUMBER_ON_BOARD, CHECK_IS_BINGO } from '../modules'; 
 
 import Cell from './BoardCell'; 
 
@@ -18,7 +18,6 @@ class Board extends Component {
    * 컴포넌트 간 공유에 필요한 사항을 store에 저장하고 나머지는 컴포넌트 내에서 
    * 데이터 활용하기로 결정하고 코드를 작성하게 되었습니다. 
    */
-  flagRestart = false; 
   
   constructor(props) {
     super(props); 
@@ -48,6 +47,10 @@ class Board extends Component {
     if(nextProps.isRunning && nextProps.isRestart) {
       this.suffle();
     } 
+
+    if(prevProps.nowTurnPlayer !== nextProps.nowTurnPlayer) {
+      this.checkOnBoard(); 
+    }
   }
 
   async init() {
@@ -71,6 +74,18 @@ class Board extends Component {
     }
   }
 
+  async checkOnBoard() {
+
+    const { matrix } = this.state; 
+    const { numberSelected } = this.props; 
+
+    this.setState({
+      matrix: await CHECK_NUMBER_ON_BOARD(matrix, numberSelected)
+    }); 
+    
+    
+  }
+
   /** 렌더링 */
   render() {
     const { player } = this.props; 
@@ -84,7 +99,12 @@ class Board extends Component {
                       row.map((col, colIdx) => (
                         <Cell 
                           key={(colIdx + rowIdx) + 1}
+                          player={player} 
                           value={col.value} 
+                          row={rowIdx} 
+                          col={colIdx} 
+                          checked={col.checked} 
+                          finished={col.finished} 
                           /> 
                       ))
                     )); 

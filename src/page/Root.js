@@ -19,14 +19,12 @@ class Root extends Component {
 
   handleOnStart = (e) => {
     e.preventDefault();
-    console.log('start'); 
     const { onStart } = this.props; 
     onStart(); 
   }
 
   handleOnRestart = (e) => {
     e.preventDefault();
-    console.log('restart'); 
     const { onRestart }  = this.props; 
     onRestart(true); 
   }
@@ -42,8 +40,8 @@ class Root extends Component {
           <Title /> 
         </div>
         <div className="board">
-          <Board player="1"/>
-          <Board player="2"/>
+          <Board player={1}/>
+          <Board player={2}/>
         </div>
         <div className="button">
           { !isRunning ? <button onClick={this.handleOnStart}>시작하기</button> : "" }
